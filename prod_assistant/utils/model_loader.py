@@ -10,7 +10,7 @@ from logger import GLOBAL_LOGGER as log
 from exception.custom_exception import ProductAssistantException
 import asyncio
 
-
+load_dotenv()
 class ApiKeyManager:
     def __init__(self):
         self.api_keys = {
