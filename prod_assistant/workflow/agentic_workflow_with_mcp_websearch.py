@@ -63,7 +63,7 @@ class AgenticRAG:
         messages = state["messages"]
         last_message = messages[-1].content
 
-        if any(word in last_message.lower() for word in ["price", "review", "product"]):
+        if any(word in last_message.lower() for word in ["price", "review", "product", "laptop", "phone", "iphone", "best", "buy", "recommend", "under", "budget", "flipkart", "amazon"]):
             return {"messages": [HumanMessage(content="TOOL: retriever")]}
         else:
             prompt = ChatPromptTemplate.from_template(
@@ -92,7 +92,8 @@ class AgenticRAG:
     async def _web_search(self, state: AgentState):
         print("--- WEB SEARCH (MCP) ---")
         query = state["messages"][-1].content
-        print(f"🔍 Searching for: {query}")
+        query = query.replace("Rewritten Query: ","").strip()
+        print(f"Searching for: {query}")
         tool = next((t for t in self.mcp_tools if t.name == "web_search"), None)
         if not tool:
             return {"messages": [HumanMessage(content="Web search tool not available.")]}
