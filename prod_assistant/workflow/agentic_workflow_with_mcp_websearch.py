@@ -30,8 +30,9 @@ class AgenticRAG:
         self.mcp_client = MultiServerMCPClient(
             {
                 "hybrid_search": {
-                    "transport": "streamable_http",
-                    "url": "http://localhost:8000/mcp"
+                    "command": "python",
+                    "args": ["prod_assistant/mcp_servers/product_search_server.py"],
+                    "transport": "stdio"
                 }
             }
         )
@@ -91,9 +92,13 @@ class AgenticRAG:
     async def _web_search(self, state: AgentState):
         print("--- WEB SEARCH (MCP) ---")
         query = state["messages"][-1].content
-        tool = next(t for t in self.mcp_tools if t.name == "web_search")
-        result = await tool.ainvoke({"query": query})  # ✅
+        print(f"🔍 Searching for: {query}")
+        tool = next((t for t in self.mcp_tools if t.name == "web_search"), None)
+        if not tool:
+            return {"messages": [HumanMessage(content="Web search tool not available.")]}
+        result = await tool.ainvoke({"query": query})
         context = result if result else "No data from web"
+        print(f"📊 Web result (first 300 chars): {context[:300]}")
         return {"messages": [HumanMessage(content=context)]}
 
 
@@ -115,6 +120,7 @@ class AgenticRAG:
         print("--- GENERATE ---")
         question = state["messages"][0].content
         docs = state["messages"][-1].content
+        print(f"📝 Using context (first 200 chars): {docs[:200]}")
 
         prompt = ChatPromptTemplate.from_template(
             PROMPT_REGISTRY[PromptType.PRODUCT_BOT].template
