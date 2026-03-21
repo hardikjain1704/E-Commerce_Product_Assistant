@@ -2,8 +2,11 @@ astra_db:
   collection_name: "ecommercedata"
 
 embedding_model:
-  provider: "google"
-  model_name: "models/text-embedding-004"
+  # provider: "google"
+  # model_name: "models/text-embedding-004"
+  provider: "hf"
+  model_name: "intfloat/e5-large-v2"
+  device: "cpu" # "cuda" or "cpu" (optional)
 
 retriever:
   top_k: 4
@@ -17,7 +20,7 @@ llm:
 
   google:
     provider: "google"
-    model_name: "gemini-2.0-flash"
+    model_name: "gemini-2.5-flash"
     temperature: 0
     max_output_tokens: 2048
 

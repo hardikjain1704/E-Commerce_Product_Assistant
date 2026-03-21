@@ -2,192 +2,426 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ShopBuddy</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" crossorigin="anonymous">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopBuddy | AI E-Commerce Assistant</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        :root {
+            --page-bg-start: #0f172a;
+            --page-bg-end: #1e293b;
+            --chat-window-bg: #1e293b;
+            --chat-header-bg: #16213e;
+            --chat-body-bg: #0f172a;
+            --user-msg-bg: #2a4692;
+            --user-msg-text: #ffffff;
+            --bot-msg-bg: #334155;
+            --bot-msg-text: #f8fafc;
+            --send-btn-bg: #2563eb;
+            --send-btn-icon: #ffffff;
+            --input-area-bg: #1e293b;
+            --input-box-bg: #0f172a;
+            --input-text: #ffffff;
+            --accent-glow: rgba(14, 165, 233, 0.4);
         }
 
-        /* Floating Chat Icon */
-        .chatbot-icon {
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--page-bg-start);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--page-bg-start) 0%, var(--page-bg-end) 100%);
+            padding: 80px 20px;
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-section img {
+            max-width: 230px;
+            background: white;
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            transition: transform 0.3s ease;
+        }
+
+        .hero-section img:hover {
+            transform: scale(1.05);
+        }
+
+        .chat-toggle-btn {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            background-color: #007bff;
+            background-color: var(--chat-header-bg);
             color: white;
+            width: 65px;
+            height: 65px;
             border-radius: 50%;
-            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
             cursor: pointer;
+            box-shadow: 0 8px 25px var(--accent-glow);
+            transition: all 0.3s ease;
             z-index: 1000;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        .chat-popup {
+        .chat-toggle-btn:hover {
+            filter: brightness(1.2);
+            transform: scale(1.05);
+        }
+
+        .chat-window {
             position: fixed;
-            bottom: 90px;
+            bottom: 110px;
             right: 30px;
-            width: 350px;
-            max-height: 500px;
+            width: 400px;
+            max-height: 650px;
+            background: var(--chat-window-bg);
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.6);
             display: none;
+            flex-direction: column;
+            overflow: hidden;
             z-index: 1001;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .chat .card {
-            border-radius: 15px;
+        .chat-header {
+            background-color: var(--chat-header-bg);
+            color: white;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 2;
         }
 
-        .msg_cotainer_send, .msg_cotainer {
-            background-color: #f1f1f1;
-            border-radius: 10px;
-            padding: 10px;
+        .chat-body {
+            height: 420px;
+            overflow-y: auto;
+            padding: 25px 20px;
+            background-color: var(--chat-body-bg);
+        }
+
+        .message {
+            margin-bottom: 20px;
+            max-width: 85%;
+            padding: 14px 18px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .message p:last-child { margin-bottom: 0; }
+        .message ul, .message ol { margin-bottom: 0; padding-left: 20px; }
+        .message li { margin-bottom: 5px; }
+
+        .message a {
+            color: #7dd3fc;
+            text-decoration: none;
+            word-wrap: break-word; 
+            overflow-wrap: break-word;
+        }
+
+        .message a:hover { text-decoration: underline; }
+
+        .msg-user {
+            background-color: var(--user-msg-bg);
+            color: var(--user-msg-text);
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .msg-bot {
+            background-color: var(--bot-msg-bg);
+            color: var(--bot-msg-text);
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        .chat-input-area {
+            padding: 15px;
+            background: var(--input-area-bg);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            z-index: 2;
+        }
+
+        .input-group {
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+            background: var(--input-box-bg);
+        }
+
+        .form-control {
+            border: none;
+            padding-left: 20px;
+            background: transparent;
+            font-size: 14px;
+            color: var(--input-text);
+        }
+
+        .form-control:focus {
+            box-shadow: none;
+            background: transparent;
+            color: var(--input-text);
+        }
+
+        .form-control::placeholder { color: rgba(255, 255, 255, 0.4); }
+
+        .btn-send {
+            background-color: var(--send-btn-bg);
+            color: var(--send-btn-icon);
+            border: none;
+            padding: 0 22px;
+            font-size: 16px;
+            transition: filter 0.2s;
+        }
+
+        .btn-send:hover {
+            filter: brightness(1.2);
+            background-color: var(--send-btn-bg);
+            color: var(--send-btn-icon);
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 12px 18px;
+            background: var(--bot-msg-bg);
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            margin-bottom: 15px;
+            width: fit-content;
+        }
+
+        .dot {
+            height: 8px; width: 8px;
+            background-color: var(--bot-msg-text);
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: bounce 1.4s infinite ease-in-out both;
+            opacity: 0.6;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Timestamp styling */
+        .time-stamp {
+            display: block;
+            font-size: 11px;
+            opacity: 0.6;
+            text-align: right;
             margin-top: 5px;
         }
 
-        .msg_time, .msg_time_send {
-            font-size: 10px;
-            color: gray;
-        }
-
-        .user_img_msg {
-            width: 30px;
-            height: 30px;
-            margin-left: 5px;
-        }
-
-        /* Static Content Styling */
-        .hero {
-            padding: 50px;
+        footer {
+            background-color: #0b0f19;
+            color: #64748b;
+            padding: 20px 0;
             text-align: center;
-            background: #f8f9fa;
+            font-size: 13px;
         }
 
-        .hero h1 {
-            font-size: 40px;
-            margin-bottom: 20px;
+        footer a {
+            color: #7dd3fc;
+            text-decoration: none;
         }
 
-        .hero p {
-            font-size: 18px;
+        footer a:hover {
+            text-decoration: underline;
         }
-
-        .footer {
-            position: relative;
-            bottom: 0;
-            width: 100%;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-
-
     </style>
 </head>
 <body>
 
-    <div class="hero d-flex flex-column align-items-center justify-content-center text-center" style="height: 90vh; background: linear-gradient(to right, #eef2f3, #8e9eab); animation: fadeIn 1s ease-out;">
-        <h1 class="display-3 font-weight-bold mb-3 gradient-text">Welcome to ShopBuddy</h1>
-        <p class="lead mb-4 text-dark">Your Smart Shopping Companion – Ask about prices, offers, reviews & more!</p>
-        <img src="/static/f6634145-b9d9-4ea1-b5e5-cb705192c6fd.png" alt="ShopBuddy Assistant" class="img-fluid shadow-lg" style="max-width: 300px; border-radius: 20px; transform: scale(1); transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+    <div class="hero-section">
+        <img src="/static/shopbuddy.png" alt="ShopBuddy Logo">
+        <h1 class="display-4 fw-bold mb-3">ShopBuddy AI</h1>
+        <p class="lead text-light" style="max-width: 600px;">
+            Your intelligent e-commerce assistant. Ask about products, compare prices, and get real-time market data instantly.
+        </p>
     </div>
 
-
-
-    <!-- Chatbot Floating Icon -->
-    <div class="chatbot-icon" id="openChat">
-        <i class="fas fa-comments fa-lg"></i>
+    <div class="chat-toggle-btn" id="chatToggleBtn">
+        <i class="fas fa-comment-dots"></i>
     </div>
 
-    <!-- Chatbot Popup -->
-    <div class="chat-popup" id="chatPopup">
-        <div class="card">
-            <div class="card-header msg_head">
-                <div class="d-flex bd-highlight">
-                    <div class="img_cont">
-                        <img src="https://static.vecteezy.com/system/resources/previews/016/017/018/non_2x/ecommerce-icon-free-png.png" class="rounded-circle user_img" width="40">
-                    </div>
-                    <div class="user_info ml-2">
-                        <span>QuickCart Help</span><br>
-                        <small>Ask your queries</small>
-                    </div>
-                    <div class="ml-auto">
-                        <button class="btn btn-sm btn-danger" id="closeChat">&times;</button>
-                    </div>
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <div>
+                <i class="fas fa-robot me-2"></i>
+                <strong>ShopBuddy</strong>
+            </div>
+            <button class="btn btn-sm text-white" id="closeChatBtn" style="border:none; background:none;">
+                <i class="fas fa-times fa-lg"></i>
+            </button>
+        </div>
+        
+        <div class="chat-body" id="chatBody">
+            <div class="message msg-bot">
+                <div>Hi! I'm ShopBuddy. How can I help you find the perfect product today?</div>
+            </div>
+            
+            <div class="typing-indicator" id="typingIndicator">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
+
+        <div class="chat-input-area">
+            <form id="chatForm">
+                <div class="input-group">
+                    <input type="text" id="userInput" class="form-control" placeholder="Ask about a product..." required autocomplete="off">
+                    <button class="btn btn-send" type="submit">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </div>
-            </div>
-            <div id="messageFormeight" class="card-body msg_card_body" style="overflow-y: auto; height: 300px;"></div>
-            <div class="card-footer">
-                <form id="messageArea" class="input-group">
-                    <input type="text" id="text" name="msg" placeholder="Type message..." class="form-control type_msg" required>
-                    <div class="input-group-append">
-                        <button type="submit" id="send" class="input-group-text send_btn"><i class="fas fa-paper-plane"></i></button>
-                    </div>
-                </form>
-            </div>
+            </form>
         </div>
     </div>
 
-    <!-- JS Logic -->
-    <script>
-        $(document).ready(function() {
-            // Open Chat Popup
-            $("#openChat").click(function() {
-                $("#chatPopup").fadeIn();
-            });
-
-            // Close Chat Popup
-            $("#closeChat").click(function() {
-                $("#chatPopup").fadeOut();
-            });
-
-            // Handle Chat Submit
-            $("#messageArea").on("submit", function(event) {
-                const date = new Date();
-                const hour = date.getHours();
-                const minute = String(date.getMinutes()).padStart(2, '0');
-                const str_time = `${hour}:${minute}`;
-                var rawText = $("#text").val();
-
-                var userHtml = `
-                    <div class="d-flex justify-content-end mb-2">
-                        <div class="msg_cotainer_send">${rawText}
-                            <div class="msg_time_send">${str_time}</div>
-                        </div>
-                        <img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg">
-                    </div>`;
-                
-                $("#text").val("");
-                $("#messageFormeight").append(userHtml);
-
-                $.ajax({
-                    data: { msg: rawText },
-                    type: "POST",
-                    url: "/get",
-                }).done(function(data) {
-                    var botHtml = `
-                        <div class="d-flex justify-content-start mb-2">
-                            <img src="https://static.vecteezy.com/system/resources/previews/016/017/018/non_2x/ecommerce-icon-free-png.png" class="rounded-circle user_img_msg">
-                            <div class="msg_cotainer">${data}
-                                <div class="msg_time">${str_time}</div>
-                            </div>
-                        </div>`;
-                    $("#messageFormeight").append(botHtml);
-                    $("#messageFormeight").scrollTop($("#messageFormeight")[0].scrollHeight);
-                });
-
-                event.preventDefault();
-            });
-        });
-    </script>
-    <!-- 👇 Add this just before </body> -->
-    <footer class="footer mt-auto py-3 bg-dark text-white text-center">
+    <footer>
         <div class="container">
-            <p class="mb-1">© 2025 Customer Support System</p>
-            <p class="mb-0">Need help? <a href="mailto:support@example.com" class="text-warning">support@example.com</a></p>
+            <p class="mb-1">&copy; 2026 ShopBuddy AI Assistant. Built for professional portfolio.</p>
+            <p class="mb-0">
+                <a href="https://github.com/hardikjain1704/E-Commerce_Product_Assistant" target="_blank">
+                    <i class="fab fa-github"></i> View Source Code
+                </a>
+            </p>
         </div>
     </footer>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatToggleBtn = document.getElementById('chatToggleBtn');
+            const chatWindow = document.getElementById('chatWindow');
+            const closeChatBtn = document.getElementById('closeChatBtn');
+            const chatForm = document.getElementById('chatForm');
+            const userInput = document.getElementById('userInput');
+            const chatBody = document.getElementById('chatBody');
+            const typingIndicator = document.getElementById('typingIndicator');
+
+            marked.setOptions({ breaks: true, gfm: true });
+
+            chatToggleBtn.addEventListener('click', () => {
+                chatWindow.style.display = chatWindow.style.display === 'flex' ? 'none' : 'flex';
+                if(chatWindow.style.display === 'flex') userInput.focus();
+            });
+
+            closeChatBtn.addEventListener('click', () => {
+                chatWindow.style.display = 'none';
+            });
+
+            chatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const messageText = userInput.value.trim();
+                if (!messageText) return;
+
+                appendMessage(messageText, 'msg-user');
+                userInput.value = '';
+                
+                chatBody.appendChild(typingIndicator);
+                typingIndicator.style.display = 'block';
+                scrollToBottom();
+
+                try {
+                    const formData = new FormData();
+                    formData.append('msg', messageText);
+
+                    const response = await fetch('/get', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) throw new Error('Server connection failed.');
+                    
+                    const rawResponseText = await response.text();
+                    let cleanText = rawResponseText;
+
+                    try {
+                        cleanText = JSON.parse(rawResponseText);
+                    } catch (e) {
+                        console.warn("Response was not JSON encoded.");
+                    }
+                    
+                    const formattedHtml = marked.parse(cleanText);
+                    
+                    typingIndicator.style.display = 'none';
+                    appendMessage(formattedHtml, 'msg-bot', true);
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    typingIndicator.style.display = 'none';
+                    appendMessage('Sorry, I am having trouble connecting to the server. Please check your backend connection.', 'msg-bot');
+                }
+            });
+
+            function appendMessage(content, className, isHtml = false) {
+                // Generate current timestamp
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `message ${className}`;
+                
+                // Wrap content in its own div to separate from the timestamp
+                const contentDiv = document.createElement('div');
+                if (isHtml) {
+                    contentDiv.innerHTML = content;
+                } else {
+                    contentDiv.textContent = content;
+                }
+
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'time-stamp';
+                timeSpan.textContent = timeString;
+
+                msgDiv.appendChild(contentDiv);
+                msgDiv.appendChild(timeSpan);
+
+                chatBody.insertBefore(msgDiv, typingIndicator);
+                scrollToBottom();
+            }
+
+            function scrollToBottom() {
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+        });
+    </script>
 </body>
 </html>

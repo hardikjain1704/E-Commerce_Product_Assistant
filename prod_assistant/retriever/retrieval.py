@@ -1,3 +1,4 @@
+# retrieval.py
 import os
 from langchain_astradb import AstraDBVectorStore
 from utils.config_loader import load_config
@@ -57,8 +58,7 @@ class Retriever:
                 search_type="mmr",
                 search_kwargs={"k": top_k,
                                 "fetch_k": 20,
-                                "lambda_mult": 0.7,
-                                "score_threshold": 0.6
+                                "lambda_mult": 0.7
                                })
             print("Retriever loaded successfully.")
             

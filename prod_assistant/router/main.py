@@ -1,14 +1,21 @@
-
-import uvicorn
+# main.py
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from langchain_core.messages import HumanMessage
 from workflow.agentic_workflow_with_mcp_websearch import AgenticRAG
 
-app = FastAPI()
+rag_agent: AgenticRAG | None = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global rag_agent
+    rag_agent = await AgenticRAG.create()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
@@ -28,6 +35,5 @@ async def index(request: Request):
 
 @app.post("/get")
 async def chat(msg: str = Form(...)):
-    rag_agent = AgenticRAG()
     answer = await rag_agent.run(msg)
     return answer

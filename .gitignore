@@ -34,3 +34,4 @@ get_lib_versions.py
 test/
 notebook/
 data/
+gitCommiter.py

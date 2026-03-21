@@ -22,4 +22,7 @@ mcp==1.14.0
 ddgs==9.6.0
 langchain-openai==0.3.32
 langchain-tavily==0.2.15
+
+sentence-transformers==5.2.2
+torch==2.10.0
 -e .

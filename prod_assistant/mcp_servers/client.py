@@ -1,13 +1,15 @@
+# client.py
 import asyncio
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
 async def main():
+    # Dynamically resolve path relative to client.py
+    server_path = str(Path(__file__).parent / "prod_assistant" / "mcp_servers" / "product_search_server.py")
+
     client = MultiServerMCPClient({
         "hybrid_search": {   # server name
             "command": "python",
-            "args": [
-                r"D:\complete_content_new\llmops-batch\ecomm-prod-assistant\prod_assistant\mcp_servers\product_search_server.py"
-            ],  # absolute path
+            "args": [server_path],  # Using the dynamic path
             "transport": "stdio",
         }
     })
@@ -21,8 +23,6 @@ async def main():
     web_tool = next(t for t in tools if t.name == "web_search")
 
     # --- Step 1: Try retriever first ---
-    #query = "Samsung Galaxy S25 price"
-    # query = "iPhone 15"
     query = "iPhone 17?"
     retriever_result = await retriever_tool.ainvoke({"query": query})
     print("\nRetriever Result:\n", retriever_result)
